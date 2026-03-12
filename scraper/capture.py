@@ -1,12 +1,3 @@
-"""
-Capture screenshots of a competitor website: homepage, /pricing, /product.
-Saves PNGs to the given output directory. Call from backend or CLI.
-
-Usage:
-  python capture.py <url> <output_dir>
-  e.g. python capture.py https://competitor.com ./data/screenshots/abc123
-"""
-
 import json
 import sys
 from pathlib import Path

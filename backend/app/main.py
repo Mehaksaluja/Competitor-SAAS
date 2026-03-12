@@ -10,10 +10,9 @@ from app.routers import competitors, scan, alerts, telegram
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Connect to MongoDB if available; otherwise in-memory storage is used
     get_client()
     yield
-    # shutdown: close client if needed
-    pass
 
 
 app = FastAPI(

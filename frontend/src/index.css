@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* Theme: palette */
+@theme {
+  --color-primary: #0474c4;
+  --color-primary-hover: #0366ad;
+  --color-secondary: #5379ae;
+  --color-dark-teal: #2c444c;
+  --color-light-bg: #a8c4ec;
+  --color-navy: #06457f;
+  --color-navy-hover: #053a6b;
+  --color-dark-navy: #262b40;
+  --color-dark-navy-light: #32384f;
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

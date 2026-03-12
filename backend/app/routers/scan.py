@@ -12,16 +12,41 @@ from app.database import get_competitors_collection, get_snapshots_collection
 
 router = APIRouter(prefix="/scan", tags=["scan"])
 
-# Project root (Competitor-SAAS); backend is project_root / "backend"
-_BACKEND_DIR = Path(__file__).resolve().parent.parent
-_PROJECT_ROOT = _BACKEND_DIR.parent
+# backend/app/routers/scan.py -> go up to backend dir, then to project root (Competitor-SAAS)
+_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent  # backend
+_PROJECT_ROOT = _BACKEND_DIR.parent  # Competitor-SAAS (where scraper/ lives)
 
 
-def _get_scraper_path() -> Path:
-    p = Path(settings.scraper_script)
-    if not p.is_absolute():
-        p = _PROJECT_ROOT / p
-    return p.resolve()
+def _get_scraper_path() -> Path | None:
+    """Return path to scraper script if it exists; try project root and cwd."""
+    candidates = [
+        _PROJECT_ROOT / "scraper" / "capture.py",
+        _PROJECT_ROOT / settings.scraper_script,
+        Path(settings.scraper_script).resolve(),
+        Path.cwd() / "scraper" / "capture.py",
+        Path.cwd() / settings.scraper_script,
+    ]
+    for p in candidates:
+        if p and p.exists():
+            return p.resolve()
+    return None
+
+
+@router.get("/debug")
+def scan_debug():
+    """
+    Check scraper setup: path resolution, file exists, project root.
+    Use this to see why "Scan now" might not be running the scraper.
+    """
+    path = _get_scraper_path()
+    return {
+        "scraper_found": path is not None,
+        "scraper_path": str(path) if path else None,
+        "project_root": str(_PROJECT_ROOT),
+        "cwd": str(Path.cwd()),
+        "python": sys.executable,
+        "hint": "Install scraper deps in the **backend** env: pip install -r ../scraper/requirements.txt then playwright install chromium (from backend folder)."
+    }
 
 
 @router.post("/{competitor_id}")
@@ -29,6 +54,7 @@ def trigger_scan(competitor_id: str, background_tasks: BackgroundTasks):
     """
     Trigger a scan for a competitor. Runs the Python scraper to capture
     screenshots (homepage, pricing, product) and stores them as a new snapshot.
+    If the scraper script is not found, a placeholder snapshot is still created.
     """
     col = get_competitors_collection()
     try:
@@ -39,50 +65,71 @@ def trigger_scan(competitor_id: str, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=404, detail="Competitor not found")
 
     scraper_path = _get_scraper_path()
-    if not scraper_path.exists():
-        raise HTTPException(
-            status_code=503,
-            detail=f"Scraper script not found at {scraper_path}. Create the scraper first.",
-        )
 
     def run_scraper_and_save():
-        url = competitor["url"]
+        snap_col = get_snapshots_collection()
+        comp_col = get_competitors_collection()
+        now = datetime.utcnow()
         out_dir = _PROJECT_ROOT / "data" / "screenshots" / competitor_id
-        out_dir.mkdir(parents=True, exist_ok=True)
-        try:
-            subprocess.run(
-                [sys.executable, str(scraper_path), url, str(out_dir)],
-                capture_output=True,
-                timeout=120,
-                cwd=str(_PROJECT_ROOT),
-            )
-        except subprocess.TimeoutExpired:
-            pass
-        except Exception:
-            pass
-        # Persist snapshot from manifest
-        manifest_path = out_dir / "manifest.json"
-        if manifest_path.exists():
-            snap_col = get_snapshots_collection()
-            comp_col = get_competitors_collection()
-            with open(manifest_path, encoding="utf-8") as f:
-                manifest = json.load(f)
-            screenshots = manifest.get("screenshots", [])
-            now = datetime.utcnow()
+        saved = False
+
+        scrape_error = None
+        if scraper_path:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                result = subprocess.run(
+                    [sys.executable, str(scraper_path), competitor["url"], str(out_dir)],
+                    capture_output=True,
+                    timeout=120,
+                    cwd=str(_PROJECT_ROOT),
+                    text=True,
+                )
+                if result.returncode != 0:
+                    scrape_error = (result.stderr or result.stdout or f"Exit code {result.returncode}").strip()[:500]
+            except subprocess.TimeoutExpired:
+                scrape_error = "Scraper timed out (120s)."
+            except Exception as e:
+                scrape_error = str(e)[:500]
+            manifest_path = out_dir / "manifest.json"
+            if manifest_path.exists():
+                with open(manifest_path, encoding="utf-8") as f:
+                    manifest = json.load(f)
+                screenshots = manifest.get("screenshots", [])
+                snap_doc = {
+                    "competitor_id": ObjectId(competitor_id),
+                    "screenshots": [{"page": s.get("page"), "path": s.get("path", ""), "url": s.get("url", "")} for s in screenshots],
+                    "summary": "",
+                    "meta": manifest,
+                    "created_at": now,
+                }
+                result = snap_col.insert_one(snap_doc)
+                saved = True
+                snap_id = result.inserted_id
+
+        if not saved:
+            msg = "Scraper not run."
+            if not scraper_path:
+                msg += " Script not found. Check GET /scan/debug for paths."
+            elif scrape_error:
+                msg += f" Error: {scrape_error}"
+            else:
+                msg += " No manifest.json produced. Install deps in **backend** env: cd backend && pip install -r ../scraper/requirements.txt && playwright install chromium"
             snap_doc = {
                 "competitor_id": ObjectId(competitor_id),
-                "screenshots": [{"page": s.get("page"), "path": s.get("path", ""), "url": s.get("url", "")} for s in screenshots],
-                "summary": "",  # TODO: AI summary
-                "meta": manifest,
+                "screenshots": [],
+                "summary": msg,
+                "meta": {},
                 "created_at": now,
             }
             result = snap_col.insert_one(snap_doc)
             snap_id = result.inserted_id
-            update = {"last_scanned_at": now, "updated_at": now}
-            if not competitor.get("baseline_snapshot_id"):
-                update["baseline_snapshot_id"] = snap_id
-                update["baseline_summary"] = ""  # TODO: AI baseline summary
-            comp_col.update_one({"_id": ObjectId(competitor_id)}, {"$set": update})
+
+        update = {"last_scanned_at": now, "updated_at": now}
+        comp = comp_col.find_one({"_id": ObjectId(competitor_id)})
+        if comp and not comp.get("baseline_snapshot_id") and snap_id is not None:
+            update["baseline_snapshot_id"] = snap_id
+            update["baseline_summary"] = ""
+        comp_col.update_one({"_id": ObjectId(competitor_id)}, {"$set": update})
 
     background_tasks.add_task(run_scraper_and_save)
     return {"ok": True, "message": "Scan started in background", "competitor_id": competitor_id}
