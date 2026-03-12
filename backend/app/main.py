@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import get_client
-from app.routers import competitors, scan, alerts, telegram
+from app.routers import competitors, scan, alerts, telegram, screenshots
 
 
 @asynccontextmanager
@@ -34,6 +34,7 @@ app.include_router(competitors.router)
 app.include_router(scan.router)
 app.include_router(alerts.router)
 app.include_router(telegram.router)
+app.include_router(screenshots.router)
 
 
 @app.get("/health")

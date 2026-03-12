@@ -22,11 +22,11 @@ export default function Navbar({ user: userProp }) {
 
   return (
     <header
-      className="h-14 flex items-center justify-between px-4 shrink-0 border-b border-white/10"
-      style={{ backgroundColor: '#06457f' }}
+      className="h-14 flex items-center justify-between px-4 shrink-0 border-b"
+      style={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb' }}
     >
       <div className="flex items-center gap-4">
-        <h2 className="text-sm font-semibold text-white/90 hidden sm:block">
+        <h2 className="text-sm font-semibold hidden sm:block" style={{ color: '#0474c4' }}>
           Dashboard
         </h2>
       </div>
@@ -34,15 +34,19 @@ export default function Navbar({ user: userProp }) {
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/10 transition"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition"
+          style={{ color: '#111827' }}
         >
-          <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: '#0474c4' }}>
+          <span
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white"
+            style={{ backgroundColor: '#0474c4' }}
+          >
             {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
           </span>
           <span className="max-w-[120px] truncate hidden sm:inline">
             {user?.name || user?.email || 'User'}
           </span>
-          <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -50,17 +54,19 @@ export default function Navbar({ user: userProp }) {
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} aria-hidden />
             <div
-              className="absolute right-0 top-full mt-1 py-1 rounded-lg shadow-xl border border-white/10 z-20 min-w-[180px]"
-              style={{ backgroundColor: '#262b40' }}
+              className="absolute right-0 top-full mt-1 py-1 rounded-lg shadow-xl border z-20 min-w-[200px] bg-white"
+              style={{ borderColor: '#e5e7eb' }}
             >
               <div className="px-4 py-3 border-b border-white/10">
-                <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
-                <p className="text-xs truncate" style={{ color: '#a8c4ec' }}>{user?.email}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{user?.name || 'User'}</p>
+                <p className="text-xs truncate" style={{ color: '#6b7280' }}>
+                  {user?.email}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 transition"
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
               >
                 Sign out
               </button>

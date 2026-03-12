@@ -33,26 +33,39 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #262b40 0%, #06457f 50%, #2c444c 100%)' }}>
+    <div
+      className="min-h-screen flex"
+      style={{ background: 'linear-gradient(135deg, #a8c4ec 0%, #5379ae 45%, #0474c4 100%)' }}
+    >
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl shadow-2xl p-8 md:p-10 border border-white/10" style={{ backgroundColor: 'rgba(38,43,64,0.95)' }}>
+          <div
+            className="rounded-2xl shadow-2xl p-8 md:p-10 border"
+            style={{ backgroundColor: '#ffffff', borderColor: '#e5e7eb' }}
+          >
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                Create an account
+              <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#0f172a' }}>
+                Create your account
               </h1>
-              <p className="mt-2 text-sm" style={{ color: '#a8c4ec' }}>
-                Start tracking your competitors
+              <p className="mt-2 text-sm" style={{ color: '#5379ae' }}>
+                Start tracking competitors with RivalPulse
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="rounded-lg px-4 py-3 text-sm bg-red-500/10 text-red-300 border border-red-500/20">
+                <div
+                  className="rounded-lg px-4 py-3 text-sm border"
+                  style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#b91c1c' }}
+                >
                   {error}
                 </div>
               )}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1.5 text-white/90">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium mb-1.5"
+                  style={{ color: '#0f172a' }}
+                >
                   Full name
                 </label>
                 <input
@@ -62,12 +75,21 @@ export default function Signup() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Jane Doe"
                   autoComplete="name"
-                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-[#5379ae]/50 text-white placeholder:text-[#a8c4ec]/60 focus:outline-none focus:ring-2 focus:ring-[#0474c4] focus:border-transparent"
+                  className="w-full rounded-lg px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-offset-0"
+                  style={{
+                    borderColor: '#d1d5db',
+                    backgroundColor: '#f9fafb',
+                    color: '#0f172a',
+                  }}
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1.5 text-white/90">
-                  Email
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-1.5"
+                  style={{ color: '#0f172a' }}
+                >
+                  Work email
                 </label>
                 <input
                   id="email"
@@ -76,47 +98,72 @@ export default function Signup() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
                   autoComplete="email"
-                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-[#5379ae]/50 text-white placeholder:text-[#a8c4ec]/60 focus:outline-none focus:ring-2 focus:ring-[#0474c4] focus:border-transparent"
+                  className="w-full rounded-lg px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-offset-0"
+                  style={{
+                    borderColor: '#d1d5db',
+                    backgroundColor: '#f9fafb',
+                    color: '#0f172a',
+                  }}
                 />
               </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-1.5 text-white/90">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-[#5379ae]/50 text-white placeholder:text-[#a8c4ec]/60 focus:outline-none focus:ring-2 focus:ring-[#0474c4] focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1.5 text-white/90">
-                  Confirm password
-                </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-[#5379ae]/50 text-white placeholder:text-[#a8c4ec]/60 focus:outline-none focus:ring-2 focus:ring-[#0474c4] focus:border-transparent"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium mb-1.5"
+                    style={{ color: '#0f172a' }}
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    className="w-full rounded-lg px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-offset-0"
+                    style={{
+                      borderColor: '#d1d5db',
+                      backgroundColor: '#f9fafb',
+                      color: '#0f172a',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium mb-1.5"
+                    style={{ color: '#0f172a' }}
+                  >
+                    Confirm password
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat password"
+                    autoComplete="new-password"
+                    className="w-full rounded-lg px-4 py-3 text-sm border focus:outline-none focus:ring-2 focus:ring-offset-0"
+                    style={{
+                      borderColor: '#d1d5db',
+                      backgroundColor: '#f9fafb',
+                      color: '#0f172a',
+                    }}
+                  />
+                </div>
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg py-3 font-semibold text-white transition hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full rounded-lg py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#0474c4' }}
               >
-                {loading ? 'Creating account…' : 'Sign up'}
+                {loading ? 'Creating account…' : 'Create account'}
               </button>
             </form>
-            <p className="mt-6 text-center text-sm" style={{ color: '#a8c4ec' }}>
+            <p className="mt-6 text-center text-sm" style={{ color: '#6b7280' }}>
               Already have an account?{' '}
               <Link to="/login" className="font-semibold hover:underline" style={{ color: '#0474c4' }}>
                 Sign in

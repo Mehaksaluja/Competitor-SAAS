@@ -1,5 +1,10 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+/** URL for a competitor screenshot image (page: homepage | pricing | product) */
+export function getScreenshotUrl(competitorId, page) {
+  return `${BASE}/screenshots/${competitorId}/${page}.png`;
+}
+
 async function request(path, options = {}) {
   const url = `${BASE}${path}`;
   const res = await fetch(url, {

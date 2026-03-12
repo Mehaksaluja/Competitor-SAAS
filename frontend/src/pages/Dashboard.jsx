@@ -1,5 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { api } from '../api';
+import { api, getScreenshotUrl } from '../api';
+
+function ScreenshotImage({ competitorId, page }) {
+  const [error, setError] = useState(false);
+  const src = getScreenshotUrl(competitorId, page);
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-32 text-sm text-gray-400">
+        Image not found
+      </div>
+    );
+  }
+  return (
+    <a href={src} target="_blank" rel="noopener noreferrer" className="block">
+      <img
+        src={src}
+        alt={page}
+        className="w-full h-auto object-contain max-h-80"
+        onError={() => setError(true)}
+      />
+    </a>
+  );
+}
 
 export default function Dashboard() {
   const [competitors, setCompetitors] = useState([]);
@@ -104,7 +126,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-white/60">Loading…</p>
+        <p className="text-gray-500">Loading…</p>
       </div>
     );
   }
@@ -112,43 +134,43 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-white">Competitor Watchlist</h1>
-        <p className="text-sm mt-0.5" style={{ color: '#a8c4ec' }}>
+        <h1 className="text-xl font-semibold text-gray-900">Competitor Watchlist</h1>
+        <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>
           Add URLs and run scans to track changes
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg px-4 py-3 text-sm bg-red-500/10 text-red-300 border border-red-500/30">
+        <div className="rounded-lg px-4 py-3 text-sm border" style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#b91c1c' }}>
           {error}
         </div>
       )}
 
       <section>
-        <h2 className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: '#a8c4ec' }}>
+        <h2 className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
           Add competitor
         </h2>
         <form onSubmit={handleAdd} className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs mb-1 text-white/70">Website URL</label>
+            <label className="block text-xs mb-1 text-gray-600">Website URL</label>
             <input
               type="url"
               value={addUrl}
               onChange={(e) => setAddUrl(e.target.value)}
               placeholder="https://competitor.com"
-              className="w-full rounded-lg px-3 py-2.5 text-white placeholder:text-white/40 border focus:outline-none focus:ring-2 focus:ring-[#0474c4] focus:border-transparent bg-white/5"
-              style={{ borderColor: '#5379ae' }}
+              className="w-full rounded-lg px-3 py-2.5 text-sm border focus:outline-none focus:ring-2 focus:ring-[#0474c4]"
+              style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff', color: '#111827' }}
             />
           </div>
           <div className="w-40">
-            <label className="block text-xs mb-1 text-white/70">Name (optional)</label>
+            <label className="block text-xs mb-1 text-gray-600">Name (optional)</label>
             <input
               type="text"
               value={addName}
               onChange={(e) => setAddName(e.target.value)}
               placeholder="Competitor name"
-              className="w-full rounded-lg px-3 py-2.5 text-white placeholder:text-white/40 border focus:outline-none focus:ring-2 focus:ring-[#0474c4] bg-white/5"
-              style={{ borderColor: '#5379ae' }}
+              className="w-full rounded-lg px-3 py-2.5 text-sm border focus:outline-none focus:ring-2 focus:ring-[#0474c4]"
+              style={{ borderColor: '#d1d5db', backgroundColor: '#ffffff', color: '#111827' }}
             />
           </div>
           <button
@@ -163,23 +185,24 @@ export default function Dashboard() {
       </section>
 
       <section>
-        <h2 className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: '#a8c4ec' }}>
+        <h2 className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: '#6b7280' }}>
           Watchlist
         </h2>
         {competitors.length === 0 ? (
-          <p className="text-sm text-white/50">No competitors yet. Add a URL above.</p>
+          <p className="text-sm text-gray-500">No competitors yet. Add a URL above.</p>
         ) : (
           <ul className="space-y-2">
             {competitors.map((c) => (
               <li
                 key={c.id}
-                className="rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 border border-white/10 bg-white/5"
+                className="rounded-lg p-4 flex flex-wrap items-center justify-between gap-3 border bg-white"
+                style={{ borderColor: '#e5e7eb' }}
               >
                 <div className="min-w-0">
-                  <p className="font-medium text-white truncate">{c.name || c.url}</p>
-                  <p className="text-sm text-white/60 truncate">{c.url}</p>
+                  <p className="font-medium text-gray-900 truncate">{c.name || c.url}</p>
+                  <p className="text-sm text-gray-600 truncate">{c.url}</p>
                   {c.last_scanned_at && (
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Last scan: {new Date(c.last_scanned_at).toLocaleString()}
                     </p>
                   )}
@@ -188,19 +211,21 @@ export default function Dashboard() {
                   <button
                     onClick={() => handleScan(c.id)}
                     disabled={scanningId === c.id}
-                    className="rounded-md px-3 py-1.5 text-sm text-white/90 hover:bg-white/10 disabled:opacity-50 transition border border-white/10"
+                    className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition border"
+                    style={{ borderColor: '#e5e7eb' }}
                   >
                     {scanningId === c.id ? 'Scanning…' : 'Scan now'}
                   </button>
                   <button
                     onClick={() => loadSnapshots(c.id)}
-                    className="rounded-md px-3 py-1.5 text-sm text-white/90 hover:bg-white/10 transition border border-white/10"
+                    className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition border"
+                    style={{ borderColor: '#e5e7eb' }}
                   >
                     View snapshots
                   </button>
                   <button
                     onClick={() => handleDelete(c.id)}
-                    className="rounded-md px-3 py-1.5 text-sm text-red-300 hover:bg-red-500/20 transition"
+                    className="rounded-md px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 transition"
                   >
                     Remove
                   </button>
@@ -214,30 +239,46 @@ export default function Dashboard() {
       {snapshots !== null && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium uppercase tracking-wider" style={{ color: '#a8c4ec' }}>
+            <h2 className="text-sm font-medium uppercase tracking-wider" style={{ color: '#6b7280' }}>
               Snapshots
             </h2>
-            <button onClick={closeSnapshots} className="text-sm text-white/60 hover:text-white">
+            <button onClick={closeSnapshots} className="text-sm text-gray-500 hover:text-gray-700">
               Close
             </button>
           </div>
           {snapshots.length === 0 ? (
-            <p className="text-sm text-white/50">No snapshots yet. Run a scan first.</p>
+            <p className="text-sm text-gray-500">No snapshots yet. Run a scan first.</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-6">
               {snapshots.map((s) => (
-                <li key={s.id} className="rounded-lg p-4 border border-white/10 bg-white/5">
-                  <p className="text-xs text-white/40 mb-2">
+                <li
+                  key={s.id}
+                  className="rounded-lg p-4 border bg-white"
+                  style={{ borderColor: '#e5e7eb' }}
+                >
+                  <p className="text-xs text-gray-400 mb-2">
                     {s.created_at ? new Date(s.created_at).toLocaleString() : '—'}
                   </p>
-                  {s.summary && <p className="text-sm text-white/80 mb-2">{s.summary}</p>}
-                  <ul className="flex flex-wrap gap-2">
+                  {s.summary && <p className="text-sm text-gray-800 mb-3">{s.summary}</p>}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {(s.screenshots || []).map((sc, i) => (
-                      <li key={i} className="text-xs text-white/50">
-                        {sc.page}: {sc.path ? 'saved' : '—'}
-                      </li>
+                      <div key={i} className="rounded-lg border overflow-hidden bg-gray-50" style={{ borderColor: '#e5e7eb' }}>
+                        <p className="text-xs font-medium px-2 py-1.5 capitalize" style={{ color: '#6b7280' }}>
+                          {sc.page}
+                        </p>
+                        {competitorIdForSnapshots && sc.path ? (
+                          <ScreenshotImage
+                            competitorId={competitorIdForSnapshots}
+                            page={sc.page}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-32 text-sm text-gray-400">
+                            No image
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </li>
               ))}
             </ul>
