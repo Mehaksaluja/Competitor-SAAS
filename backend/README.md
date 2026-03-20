@@ -31,9 +31,6 @@ FastAPI backend for the competitor monitoring SaaS: watchlist, scans, screenshot
    playwright install chromium
    ```
    You do **not** start the scraper separately—clicking "Scan now" in the dashboard runs it automatically.
-
-## Run
-
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
